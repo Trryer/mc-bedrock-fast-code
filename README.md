@@ -1,5 +1,7 @@
 # mc-bedrock-fast-code
 
+[中文说明](README.zh-CN.md)
+
 `mc-bedrock-fast-code` is a Codex skill and script toolkit for NetEase Minecraft Bedrock / MCStudio ModSDK addon work.
 
 It follows a knowledge-first workflow:
