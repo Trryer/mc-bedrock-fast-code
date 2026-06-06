@@ -60,6 +60,21 @@ python mc-bedrock-fast-code/scripts/prepare_knowledge.py --root ~/.codex/mc-bedr
 
 远程索引适合做名称、路径、常见写法查询；它不是完整权威数据。需要版本精确行为时，仍建议使用本地索引。
 
+## 下载官方公开 Demo
+
+网易官方 ModSDK Demo 示例页面提供了公开的 3.8 demo 包：
+
+- 页面：<https://mc.163.com/dev/mcmanual/mc-dev/mcguide/20-%E7%8E%A9%E6%B3%95%E5%BC%80%E5%8F%91/13-%E6%A8%A1%E7%BB%84SDK%E7%BC%96%E7%A8%8B/60-Demo%E7%A4%BA%E4%BE%8B.html>
+- 官方下载：<https://g79.gdl.netease.com/3.8Demo.zip>
+
+skill 下载脚本默认使用官方地址：
+
+```bash
+python mc-bedrock-fast-code/scripts/download_demo_mirror.py --out ./mc-bedrock-official-public-demos
+```
+
+脚本也提供 `--private-mirror`，用于仓库所有者自己的私人备份下载。这个备份只是官方公开包的个人镜像，不属于本公开仓库内容，并且可能需要 GitHub 私人仓库权限。
+
 ## 生成代码
 
 创建一个带客户端、服务端、UI 初始结构的空白包：

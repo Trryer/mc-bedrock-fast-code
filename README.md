@@ -53,6 +53,21 @@ For users who do not want to generate local indexes or do not have the original 
 python mc-bedrock-fast-code/scripts/prepare_knowledge.py --root ~/.codex/mc-bedrock-fast-code-data --remote-indexes --remote-url "https://github.com/Trryer/mc-bedrock-fast-code/releases/latest/download/mc-bedrock-fast-code-public-index.zip"
 ```
 
+## Download Official Public Demos
+
+NetEase's official ModSDK demo page provides a public 3.8 demo package:
+
+- Page: <https://mc.163.com/dev/mcmanual/mc-dev/mcguide/20-%E7%8E%A9%E6%B3%95%E5%BC%80%E5%8F%91/13-%E6%A8%A1%E7%BB%84SDK%E7%BC%96%E7%A8%8B/60-Demo%E7%A4%BA%E4%BE%8B.html>
+- Official download: <https://g79.gdl.netease.com/3.8Demo.zip>
+
+The skill downloader defaults to the official URL:
+
+```bash
+python mc-bedrock-fast-code/scripts/download_demo_mirror.py --out ./mc-bedrock-official-public-demos
+```
+
+The script also has a `--private-mirror` option for the repository owner's personal backup of the same official public package. That backup is not part of the public repository and may require private GitHub access.
+
 ## Generate Code
 
 ```bash

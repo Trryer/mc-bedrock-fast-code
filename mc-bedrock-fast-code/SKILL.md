@@ -141,6 +141,33 @@ python scripts/index_demos.py --source ./6-1DemoMod --source "<path-to-6-4-resou
 
 The index summarizes categories, pack pairs, scripts, manifests, UI files, entity/item/block/resource files, models, animation controllers, render controllers, particles, sounds, shaders/materials, textures, and source assets. Use it to choose the closest official example before generating specialized starters.
 
+## Official Public Demo Downloads
+
+NetEase's public ModSDK demo page:
+
+- Official page: `https://mc.163.com/dev/mcmanual/mc-dev/mcguide/20-%E7%8E%A9%E6%B3%95%E5%BC%80%E5%8F%91/13-%E6%A8%A1%E7%BB%84SDK%E7%BC%96%E7%A8%8B/60-Demo%E7%A4%BA%E4%BE%8B.html`
+- Official public `3.8Demo.zip`: `https://g79.gdl.netease.com/3.8Demo.zip`
+
+The indexed API docs may also contain older public demo links, including:
+
+- Official public `3.6Demo.zip`: `https://g79.gdl.netease.com/3.6Demo.zip`
+
+The documentation also says SDK demos are available from the MC Studio content library starting with version 3.5: Content Library -> Work Templates -> the `SDK demo/examples` tag.
+
+Download the official 3.8 public demo package:
+
+```bash
+python scripts/download_demo_mirror.py --out ./mc-bedrock-official-public-demos
+```
+
+For the repository owner's personal convenience, the downloader can also use a private GitHub backup mirror of the locally available 3.8 official public demo folders. Treat that mirror as a backup of official public demo materials, not as content owned by this project; it may require private GitHub access:
+
+```bash
+python scripts/download_demo_mirror.py --private-mirror --out ./mc-bedrock-official-public-demos
+```
+
+Use either source only if you are allowed to access and use the official public demo materials under their original terms.
+
 ## Integrated Indexes
 
 This skill can subsume the old split workflow:

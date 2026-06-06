@@ -11,6 +11,9 @@ It is not affiliated with, endorsed by, sponsored by, or approved by Mojang, Mic
 This repository may refer to or summarize metadata from:
 
 - Public NetEase Minecraft/MCStudio ModSDK demo packs and tutorials.
+- NetEase's public ModSDK demo page and official 3.8 demo download:
+  - `https://mc.163.com/dev/mcmanual/mc-dev/mcguide/20-%E7%8E%A9%E6%B3%95%E5%BC%80%E5%8F%91/13-%E6%A8%A1%E7%BB%84SDK%E7%BC%96%E7%A8%8B/60-Demo%E7%A4%BA%E4%BE%8B.html`
+  - `https://g79.gdl.netease.com/3.8Demo.zip`
 - Public ModSDK documentation, including community mirrors such as `EaseCation/netease-modsdk-wiki`.
 - Minecraft Bedrock / NetEase `MinecraftPE_Netease` game data installed locally by the user.
 
