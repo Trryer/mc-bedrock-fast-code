@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.DS_Store
+
+# Local/generated full indexes and docs should stay outside git.
+mc_bedrock_local_indexes/
+mc_bedrock_demo_index/
+mc_bedrock_api_references/
+.codex/
+
+# Keep the curated lightweight zip, but ignore expanded generated index folder.
+public-index/

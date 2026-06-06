@@ -1,0 +1,4 @@
+interface:
+  display_name: "MC Bedrock Fast Code"
+  short_description: "Generate MCStudio ModSDK starter code."
+  default_prompt: "Use $mc-bedrock-fast-code to prepare local indexes and generate a clean namespaced ModSDK starter pack."
