@@ -9,7 +9,7 @@ Use this skill for fast NetEase Bedrock/MCStudio ModSDK project setup, repetitiv
 
 ## Workflow
 
-1. On skill use, first inspect the current workspace with `scripts/detect_project.py --project <cwd>` unless the user is only asking about the skill itself. If it looks like a NetEase Bedrock/MCStudio project, also check whether a usable `knowledge_registry.json`, API docs, demo index, and vanilla local index exist.
+1. On skill use, first inspect the current workspace with `scripts/detect_project.py --project <cwd>` unless the user is only asking about the skill itself. If it looks like a NetEase Bedrock/MCStudio project, immediately run `scripts/modsdk_python_env.py --project <cwd>` to verify Python 2.7.18 and the Mod SDK completion package, then check whether a usable `knowledge_registry.json`, API docs, demo index, and vanilla local index exist.
 2. If the workspace is a NetEase Bedrock project but required indexes are missing, enter the knowledge-preparation flow before writing non-trivial code:
    - Ask for MCStudio/MinecraftPE_Netease install root or version folder before slow auto-search.
    - Ask which major game versions to index; recommend one representative per major version.
@@ -26,6 +26,26 @@ Use this skill for fast NetEase Bedrock/MCStudio ModSDK project setup, repetitiv
 8. Generate files with `scripts/fast_code.py`. Start with `create-pack`, then use `add-ui`, `add-entity`, `add-item`, or `add-block` for focused additions.
 9. When generating from a base vanilla entity, query the local vanilla index and copy only useful shape/components; keep new namespace identifiers clean.
 10. Do not place generated demo indexes, downloaded wiki files, local vanilla indexes, or created packs inside the final skill zip.
+
+## ModSDK Python Environment
+
+NetEase ModSDK projects expect Python 2.7.18 for syntax compilation checks. After project detection succeeds, run:
+
+```bash
+python scripts/modsdk_python_env.py --project <cwd>
+```
+
+If the current Python is not 2.7.18, ask the user to switch or update the project interpreter to Python 2.7.18. If the script auto-detects a Python 2.7.18 executable, use that path for later syntax checks. If it finds Python 2 but not 2.7.18, ask the user to update it or provide an exact 2.7.18 path. If no Python 2 interpreter is detected, ask the user to specify the Python 2.7.18 install directory/executable; if they do not have one, ask them to download and install Python 2.7.18.
+
+If the user insists on not using Python 2.7.18 and does not want to download it, run future checks with `--accept-unsupported-python` or stop checking the Python version for that task. Warn once that syntax compilation checks may not reliably validate the project's basic Python syntax, then move on.
+
+Once Python 2.7.18 is selected, the script checks `pip list` for `mc-netease-sdk`. If missing, it installs it with:
+
+```bash
+<python-2.7.18> -m pip install mc-netease-sdk
+```
+
+Do not check or install `mc-netease-sdk` when the selected interpreter is not Python 2.
 
 ## Query And Diagnose
 

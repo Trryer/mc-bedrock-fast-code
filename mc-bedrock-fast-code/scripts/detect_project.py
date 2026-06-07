@@ -52,18 +52,34 @@ def find_registry(explicit: str | None, root: str | None) -> Path | None:
 
 def detect_project(project: Path) -> dict[str, object]:
     signals: list[dict[str, str]] = []
-    for kind, pattern in PROJECT_PATTERNS:
-        for path in project.glob(pattern):
-            signals.append({"kind": kind, "path": str(path.relative_to(project))})
+    for child in project.iterdir() if project.exists() else []:
+        name = child.name
+        if name == "studio.json":
+            signals.append({"kind": "studio.json", "path": name})
+        elif child.is_dir() and name.endswith("_behavior"):
+            signals.append({"kind": "behavior_pack_dir", "path": name})
+        elif child.is_dir() and name.endswith("_resource"):
+            signals.append({"kind": "resource_pack_dir", "path": name})
+        elif child.is_dir() and name.endswith("_beh"):
+            signals.append({"kind": "behavior_pack_dir_short", "path": name})
+        elif child.is_dir() and name.endswith("_res"):
+            signals.append({"kind": "resource_pack_dir_short", "path": name})
+        elif child.is_dir() and name.endswith("Scripts"):
+            signals.append({"kind": "scripts_dir", "path": name})
+        elif child.is_dir() and name.startswith("netease_"):
+            signals.append({"kind": "netease_dir", "path": name})
     py_files = list(project.rglob("*.py"))[:500]
     for path in py_files:
+        rel = path.relative_to(project)
+        if (project / "SKILL.md").exists() and rel.parts and rel.parts[0] == "scripts":
+            continue
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
             continue
         for kind, pattern in CODE_PATTERNS.items():
             if re.search(pattern, text):
-                signals.append({"kind": kind, "path": str(path.relative_to(project))})
+                signals.append({"kind": kind, "path": str(rel)})
     namespaces = sorted({
         p.name[:-9] for p in project.glob("*_behavior") if p.is_dir()
     } | {
