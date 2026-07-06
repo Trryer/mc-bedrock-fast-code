@@ -7,7 +7,7 @@ import json
 import re
 import uuid
 from pathlib import Path
-from compat import try_load_json
+from compat import as_text, try_load_json
 
 BEHAVIOR_SUFFIXES = ('_behavior', '_beh', 'behavior', 'beh')
 RESOURCE_SUFFIXES = ('_resource', '_res', 'resource', 'res')
@@ -229,7 +229,7 @@ def append_lang(path, key, value):
     if path.exists() and key in path.read_text(encoding='utf-8', errors='ignore'):
         return
     with path.open('a', encoding='utf-8') as fh:
-        fh.write(line)
+        fh.write(as_text(line))
 
 def build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
