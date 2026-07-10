@@ -12,7 +12,9 @@ from compat import utcnow_iso
 from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 
-def run(cmd):
+def run(cmd, stream=False):
+    if stream:
+        return {'cmd': cmd, 'returncode': subprocess.call(cmd), 'stdout': '', 'stderr': ''}
     proc = run_command(cmd)
     if proc.stdout:
         print(proc.stdout.strip())
@@ -39,7 +41,10 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', default=str(Path.home() / '.codex' / 'mc-bedrock-fast-code-data'), help='External knowledge root.')
     parser.add_argument('--registry', help='Registry JSON path. Defaults to <root>/knowledge_registry.json.')
-    parser.add_argument('--api-docs', action='store_true', help='Download/update official ModSDK API docs.')
+    parser.add_argument('--api-docs', action='store_true', help='Download/update all official API, development-guide, and tutorial trees, then rebuild the API index.')
+    parser.add_argument('--development-guides', action='store_true', help='Refresh only the official mcguide development-guide tree.')
+    parser.add_argument('--tutorial-docs', action='store_true', help='Refresh only the official mconline tutorial tree.')
+    parser.add_argument('--all-official-docs', action='store_true', help='Alias for --api-docs.')
     parser.add_argument('--remote-indexes', action='store_true', help='Download lightweight public indexes instead of or before local generation.')
     parser.add_argument('--remote-url', help='Zip URL for lightweight public indexes.')
     parser.add_argument('--api-out', help='External API docs output. Defaults to <root>/api_references.')
@@ -76,9 +81,18 @@ def main():
             return int(result['returncode'])
         registry = read_registry(registry_path)
         registry.setdefault('runs', runs)
+    official_scopes = []
     if args.api_docs:
-        result = run([sys.executable, str(SCRIPT_DIR / 'update_api_docs.py'), '--out', str(api_out)])
-        runs.append(_merge_dicts({'kind': 'api_docs', 'out': str(api_out)}, result))
+        official_scopes.append('all')
+    if args.development_guides:
+        official_scopes.append('guides')
+    if args.tutorial_docs:
+        official_scopes.append('tutorials')
+    if args.all_official_docs:
+        official_scopes = ['all']
+    for scope in official_scopes:
+        result = run([sys.executable, '-u', str(SCRIPT_DIR / 'update_api_docs.py'), '--out', str(api_out), '--scope', scope], stream=True)
+        runs.append(_merge_dicts({'kind': 'official_docs_{}'.format(scope), 'out': str(api_out)}, result))
         if result['returncode'] != 0:
             write_registry(registry_path, registry)
             return int(result['returncode'])

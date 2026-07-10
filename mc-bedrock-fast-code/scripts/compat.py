@@ -15,11 +15,11 @@ PY2 = sys.version_info[0] == 2
 
 try:
     from urllib.request import Request, urlopen
-    from urllib.parse import quote, urlparse
+    from urllib.parse import quote, urljoin, urlparse
 except ImportError:  # pragma: no cover - Python 2 path
     from urllib2 import Request, urlopen
     from urllib import quote
-    from urlparse import urlparse
+    from urlparse import urljoin, urlparse
 
 
 class CompletedProcess(object):

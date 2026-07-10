@@ -57,15 +57,32 @@ def query_demo(registry, query, kind, limit):
             break
     return results
 
-def query_api(registry, query, kind, limit):
-    api_root = registry.get('api_references')
-    if not api_root:
-        return []
-    files = []
-    if kind in (None, 'all', 'api'):
-        files.extend(['api-index.md', 'interfaces.md', 'events.md'])
-    else:
-        files.extend(['api-index.md', 'interfaces.md', 'events.md'])
+def api_index_files(api_kind):
+    if api_kind == 'interface':
+        return ['interfaces.md']
+    if api_kind == 'event':
+        return ['events.md']
+    return ['interfaces.md', 'events.md']
+
+
+def official_api_doc_files(api_kind):
+    if api_kind == 'interface':
+        return ['official-api-interfaces.md']
+    if api_kind == 'event':
+        return ['official-api-events.md']
+    return ['official-api-docs.md']
+
+
+def mirror_api_root(api_root, api_kind):
+    root = Path(api_root) / 'wiki' / 'docs' / 'mcdocs' / '1-ModAPI'
+    if api_kind == 'interface':
+        return root / '接口'
+    if api_kind == 'event':
+        return root / '事件'
+    return Path(api_root) / 'wiki' / 'docs' / 'mcdocs'
+
+
+def query_index_files(api_root, files, query, limit, source):
     results = []
     seen = set()
     for name in files:
@@ -73,16 +90,63 @@ def query_api(registry, query, kind, limit):
         if not path.exists():
             continue
         for lineno, line in enumerate(path.read_text(encoding='utf-8', errors='replace').splitlines(), 1):
-            if text_match(line, query):
-                key = (str(path), lineno)
-                if key in seen:
-                    continue
-                seen.add(key)
-                results.append({'source': 'api', 'path': str(path), 'line': lineno, 'text': line[:500]})
-                if len(results) >= limit:
-                    return results
+            if not text_match(line, query):
+                continue
+            key = (str(path), lineno)
+            if key in seen:
+                continue
+            seen.add(key)
+            results.append({'source': source, 'path': str(path), 'line': lineno, 'text': line[:500]})
+            if len(results) >= limit:
+                return results
+    return results
+
+
+def query_api_type(api_root, query, limit, api_kind):
+    results = query_index_files(api_root, api_index_files(api_kind), query, limit, 'api_{}'.format(api_kind))
     if not results:
-        results.extend(query_api_updates(registry, query, limit))
+        results = query_index_files(api_root, official_api_doc_files(api_kind), query, limit, 'official_api_doc_{}'.format(api_kind))
+    if not results:
+        results = query_document_tree(mirror_api_root(api_root, api_kind), query, limit, 'mirror_api_doc_{}'.format(api_kind), '*.md')
+    return results
+
+
+def query_api(registry, query, kind, limit, api_kind='auto', include_non_api_docs=False, api_only=False):
+    api_root = registry.get('api_references')
+    if not api_root:
+        return []
+    results = query_api_type(api_root, query, limit, api_kind)
+    if not results and api_kind in {'interface', 'event'}:
+        alternate_kind = 'event' if api_kind == 'interface' else 'interface'
+        results = query_api_type(api_root, query, limit, alternate_kind)
+    if results and not include_non_api_docs:
+        return results
+    if api_only:
+        return results
+    remaining = limit - len(results)
+    if remaining > 0:
+        results.extend(query_index_files(api_root, ['official-development-guides.md', 'official-tutorials.md'], query, remaining, 'non_api_index'))
+    if not results:
+        results.extend(query_document_tree(Path(api_root) / 'official', query, limit, 'official_non_api_doc', '*.html'))
+    if not results:
+        results.extend(query_document_tree(Path(api_root) / 'wiki' / 'docs', query, limit, 'mirror_non_api_doc', '*.md'))
+    return results
+
+
+def query_document_tree(root, query, limit, source, pattern):
+    if not root.exists():
+        return []
+    results = []
+    for path in sorted(root.rglob(pattern)):
+        value = path.read_text(encoding='utf-8', errors='replace')
+        if not text_match(value, query):
+            continue
+        position = value.lower().find(query.lower())
+        start = max(0, position - 300)
+        end = min(len(value), position + len(query) + 900)
+        results.append({'source': source, 'path': str(path), 'text': value[start:end]})
+        if len(results) >= limit:
+            break
     return results
 
 
@@ -197,6 +261,9 @@ def parse_args():
     parser.add_argument('--registry', help='Path to knowledge_registry.json.')
     parser.add_argument('--root', help='Knowledge root containing knowledge_registry.json.')
     parser.add_argument('--limit', type=int, default=8)
+    parser.add_argument('--api-kind', choices=['auto', 'interface', 'event'], default='auto', help='Search only interfaces or events when the user states the API type.')
+    parser.add_argument('--api-only', action='store_true', help='Do not expand a zero-result API lookup into development guides or tutorials.')
+    parser.add_argument('--include-non-api-docs', action='store_true', help='Search development-guide and tutorial indexes even when API results exist.')
     parser.add_argument('--source', choices=['all', 'custom', 'demo', 'api', 'vanilla', 'remote'], default='all')
     return parser.parse_args()
 
@@ -211,7 +278,7 @@ def main():
     if len(results) < args.limit and args.source in {'all', 'demo'}:
         results.extend(query_demo(registry, args.query, args.kind, args.limit - len(results)))
     if len(results) < args.limit and args.source in {'all', 'api'}:
-        results.extend(query_api(registry, args.query, args.kind, args.limit - len(results)))
+        results.extend(query_api(registry, args.query, args.kind, args.limit - len(results), args.api_kind, args.include_non_api_docs, args.api_only))
     if len(results) < args.limit and args.source in {'all', 'remote'}:
         results.extend(query_remote(registry, args.query, args.kind, args.limit - len(results)))
     print_results(results)

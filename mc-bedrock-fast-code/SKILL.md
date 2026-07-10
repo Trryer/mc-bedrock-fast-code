@@ -75,7 +75,11 @@ python scripts/query_knowledge.py --registry ~/.codex/mc-bedrock-fast-code-data/
 python scripts/query_knowledge.py --registry ~/.codex/mc-bedrock-fast-code-data/knowledge_registry.json entity_alphatest --kind material
 python scripts/query_knowledge.py --registry ~/.codex/mc-bedrock-fast-code-data/knowledge_registry.json UIDemo --kind ui
 python scripts/query_knowledge.py --registry ~/.codex/mc-bedrock-fast-code-data/knowledge_registry.json zombie --kind render_controller --source remote
+python scripts/query_knowledge.py --registry ~/.codex/mc-bedrock-fast-code-data/knowledge_registry.json PlayerFishingAfterServerEvent --source api --api-kind event
+python scripts/query_knowledge.py --registry ~/.codex/mc-bedrock-fast-code-data/knowledge_registry.json CanSee --source api --api-kind interface
 ```
+
+API lookups search the compact interface/event indexes first. A zero-result API lookup automatically expands to development-guide and tutorial indexes, then their downloaded pages. When the user explicitly says to check an interface or event, pass `--api-kind interface` or `--api-kind event`: the first pass stays within that type, then a zero-result lookup automatically checks the other API type before non-API documentation. Use `--api-only` to forbid the automatic non-API fallback. Use `--include-non-api-docs` only when broader documentation should be searched even if the API index already has a result.
 
 When searching for a specified display name or id inside a user project, check `texts/zh_CN.lang` first because it often maps ids to names or names back to ids. `query_knowledge.py` prioritizes `zh_CN.lang` records in custom local indexes.
 
@@ -119,10 +123,18 @@ When the project context is unclear, use `rg` or file globs to confirm these sig
 
 ## Fast Generation
 
-Prepare reusable local knowledge first:
+Prepare all official documentation trees first; query behavior remains API-first:
 
 ```bash
 python scripts/prepare_knowledge.py --root ~/.codex/mc-bedrock-fast-code-data --api-docs --demo-source ./6-1DemoMod --demo-source "<path-to-6-4-resource-demo>" --mc-root <.../MCStudioDownload/game/MinecraftPE_Netease> --list-versions-only
+```
+
+Refresh just one non-API tree only when it is known to have changed:
+
+```bash
+python scripts/prepare_knowledge.py --root ~/.codex/mc-bedrock-fast-code-data --development-guides
+python scripts/prepare_knowledge.py --root ~/.codex/mc-bedrock-fast-code-data --tutorial-docs
+python scripts/prepare_knowledge.py --root ~/.codex/mc-bedrock-fast-code-data --all-official-docs
 ```
 
 If the user cannot or does not want to build local indexes, download the rough public fallback index package:
@@ -225,6 +237,6 @@ Use either source only if you are allowed to access and use the official public 
 
 This skill can subsume the old split workflow:
 
-- Use `scripts/update_api_docs.py` to download/update ModSDK docs into an external references directory.
+- Use `scripts/update_api_docs.py` to crawl/update ModSDK docs into an external references directory. Its default scope updates `mcdocs`, `mcguide`, and `mconline`, but writes them to separate indexes. `--scope api`, `--scope guides`, or `--scope tutorials` support targeted refreshes. Queries search compact interface/event indexes first, then automatically expand to other documentation only on a zero-result API lookup; `--api-only` disables that fallback. It downloads pages concurrently (12 workers by default) and prints progress continuously.
 - Use `scripts/local_index_versions.py`, `scripts/local_build_index.py`, and `scripts/local_query_index.py` for vanilla game data indexes. Ask the user for install root, versions, and output root first; prefer one representative index per major version unless the user requests all versions.
 - Store generated API docs, vanilla indexes, and demo indexes in stable external roots so multiple projects can reuse them.
